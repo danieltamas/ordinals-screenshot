@@ -24,7 +24,7 @@ app.use('/', routes);
 
 // Initialize the server
 app.listen(process.env.ORDINALS_PORT, async () => {
-  console.log(`Ordinals Screenshot Server is running at ${process.env.ORDINALS_PORT}`)
+  console.log(`Ordinals Screenshot Server is running at http://localhost:${process.env.ORDINALS_PORT}`)
 })
 
 // Gracefully shutdown the server

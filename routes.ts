@@ -1,13 +1,20 @@
 import express, { Request, Response } from 'express'
 import puppeteer from 'puppeteer';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
 
 const router = express.Router()
 
-router.get('/content/:inscriptionId', async (req: Request, res: Response) => {
+router.get('/content/:id', async (req: Request, res: Response) => {
     try {
 
-        if(!('inscriptionId' in req.params)){
+        if(!('id' in req.params)){
             throw new Error('Inscription id needed');
+        }
+
+        if(existsSync(`./screenshots/${req.params.id}.jpg`)){
+            const ss = readFileSync(`./screenshots/${req.params.id}.jpg`);
+            res.set('content-type', 'image/jpeg');
+            return res.status(200).send(ss);
         }
 
         const { width, height } = { width: 450, height: 450 };
@@ -16,7 +23,7 @@ router.get('/content/:inscriptionId', async (req: Request, res: Response) => {
 
         const page = await browser.newPage();
         await page.setViewport({ width, height });
-        const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/${req.params.inscriptionId}`, {
+        const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/content/${req.params.id}`, {
             waitUntil : "networkidle0"
         });
 
@@ -45,8 +52,11 @@ router.get('/content/:inscriptionId', async (req: Request, res: Response) => {
         await page.close();
         await browser.close();
 
+        mkdirSync('./screenshots', { recursive: true });
+        writeFileSync(`./screenshots/${req.params.id}.jpg`, screenshot);
+
         res.set('content-type', 'image/jpeg');
-        return res.status(200).end(screenshot, 'binary');
+        return res.status(200).send(screenshot);
     }catch(err: any){
         return res.status(404).json({ error: true, message: err.message || err })
     }
