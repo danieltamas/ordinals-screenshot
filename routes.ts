@@ -19,7 +19,7 @@ router.get('/content/:id', async (req: Request, res: Response) => {
 
         const { width, height } = { width: 450, height: 450 };
 
-        const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"]});
+        const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"]});
 
         const page = await browser.newPage();
         await page.setViewport({ width, height });
