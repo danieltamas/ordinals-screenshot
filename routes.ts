@@ -24,7 +24,7 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
             headless: true, 
             ignoreHTTPSErrors: true,
             defaultViewport: { width, height },
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--ignore-certificate-errors'],
         });
 
         const page = await browser.newPage();
