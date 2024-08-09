@@ -64,7 +64,7 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
             headless: true, 
             ignoreHTTPSErrors: true,
             defaultViewport: { width, height },
-            args: ['--ignore-certificate-errors']
+            args: ['--no-sandbox', '--ignore-certificate-errors']
         });
 
         const page = await browser.newPage();
