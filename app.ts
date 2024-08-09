@@ -32,9 +32,9 @@ app.use('/', routes);
 app.use(<ErrorRequestHandler>(err: any, req: Request, res: Response, next: NextFunction):void => {
   process.env.PRINT_ERRORS && console.error(`[ ERROR ]`, err.code, err.message)
   res.header('Content-Type', 'application/json');
-  res.status(err.code).json({
+  res.status(err.code || 404).json({
       error: true,
-      status: err.code,
+      status: err.code || 404,
       message: err.message,
   });
 })
