@@ -14,7 +14,8 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
         if(existsSync(`./screenshots/${req.params.id}.jpg`)){
             const ss = readFileSync(`./screenshots/${req.params.id}.jpg`);
             res.set('content-type', 'image/jpeg');
-            return res.status(200).send(ss);
+            res.status(200).send(ss);
+            return
         }
 
         const { width, height } = { width: 450, height: 450 };
@@ -23,13 +24,14 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
             headless: true, 
             ignoreHTTPSErrors: true,
             defaultViewport: { width, height },
-            ignoreDefaultArgs: ['--disable-extensions'],
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
         const page = await browser.newPage();
         const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/content/${req.params.id}`, {
-            waitUntil : "networkidle0"
+            waitUntil : "networkidle0",
+            referer: process.env.ORDINALS_ENDPOINT,
+            referrerPolicy: 'strict-origin-when-cross-origin'
         });
 
         if(!navigation?.ok()){
