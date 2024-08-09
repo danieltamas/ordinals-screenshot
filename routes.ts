@@ -19,7 +19,12 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
 
         const { width, height } = { width: 450, height: 450 };
 
-        const browser = await puppeteer.launch({ headless: true, args: ["--no-sandbox"]});
+        const browser = await puppeteer.launch({ 
+            headless: true, 
+            ignoreHTTPSErrors: true,
+            ignoreDefaultArgs: ['--disable-extensions'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
 
         const page = await browser.newPage();
         await page.setViewport({ width, height });
