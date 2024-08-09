@@ -12,16 +12,12 @@ const app: Express = express()
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-const getAllowedOrigin = () => {
-
-}
-
 // Enable CORS
 app.use(
   cors({
-    origin: function(oridin, callback) {
+    origin: function(origin: string | undefined, callback) {
       const whitelist = process.env.ORDINALS_ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || []
-      if (whitelist.indexOf(origin) !== -1) {
+      if (whitelist.indexOf(origin as string) !== -1) {
           callback(null, true)
         } else {
           callback(new Error('Not allowed by CORS'))
