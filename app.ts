@@ -6,6 +6,7 @@ import routes from './routes'
 
 dotenv.config()
 
+const whitelist = process.env.ORDINALS_ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || []
 const app: Express = express()
 
 // Parse incoming requests data
@@ -16,8 +17,7 @@ app.use(bodyParser.json())
 app.use(
   cors({
     origin: function(origin: string | undefined, callback) {
-      const whitelist = process.env.ORDINALS_ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || []
-      if (whitelist.indexOf(origin as string) !== -1) {
+      if (whitelist.indexOf(origin as string) !== -1 || origin === undefined) {
           callback(null, true)
         } else {
           callback(new Error('Not allowed by CORS'))
