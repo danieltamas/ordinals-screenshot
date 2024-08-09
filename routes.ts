@@ -64,14 +64,13 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
             headless: true, 
             ignoreHTTPSErrors: true,
             defaultViewport: { width, height },
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--ignore-certificate-errors']
+            args: ['--ignore-certificate-errors']
         });
 
         const page = await browser.newPage();
         const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/content/${req.params.id}`, {
             waitUntil : "networkidle0",
-            referer: process.env.ORDINALS_ENDPOINT,
-            referrerPolicy: 'strict-origin-when-cross-origin',
+            referer: process.env.ORDINALS_ENDPOINT
         });
 
         if(!navigation?.ok()){
