@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express'
-import puppeteer from 'puppeteer';
+import puppeteer, { ProtocolType } from 'puppeteer';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
 
 const router = express.Router()
@@ -22,12 +22,12 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
         const browser = await puppeteer.launch({ 
             headless: true, 
             ignoreHTTPSErrors: true,
+            defaultViewport: { width, height },
             ignoreDefaultArgs: ['--disable-extensions'],
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width, height });
         const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/content/${req.params.id}`, {
             waitUntil : "networkidle0"
         });
