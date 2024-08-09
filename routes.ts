@@ -1,14 +1,54 @@
 import express, { Request, Response, NextFunction } from 'express'
-import puppeteer, { ProtocolType } from 'puppeteer';
+import puppeteer from 'puppeteer';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
 
 const router = express.Router()
 
+class UnauthorizedError extends Error {
+    code: number;
+    constructor(message: string) {
+        super(message);
+        this.code = 401;
+    }
+}
+
+class ForbiddenError extends Error {
+    code: number;
+    constructor(message: string) {
+        super(message);
+        this.code = 403;
+    }
+}
+
+class NotFoundError extends Error {
+    code: number;
+    constructor(message: string) {
+        super(message);
+        this.code = 404;
+    }
+}
+
+class NavigationError extends Error {
+    code: number;
+    constructor(message: string) {
+        super(message);
+        this.code = 400;
+    }
+}
+
 router.get('/content/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
 
+        if(process.env.NODE_ENV !== 'dev'){
+            const xKey = req?.headers['x-key'];
+
+            if(!xKey || xKey !== process.env.ORDINALS_XKEY){
+                throw new UnauthorizedError('Unauthorized request')
+            }
+        }   
+        
         if(!('id' in req.params)){
-            throw new Error('Inscription id needed');
+            throw new ForbiddenError('Inscription id needed');
         }
 
         if(existsSync(`./screenshots/${req.params.id}.jpg`)){
@@ -24,27 +64,19 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
             headless: true, 
             ignoreHTTPSErrors: true,
             defaultViewport: { width, height },
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--ignore-certificate-errors'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--ignore-certificate-errors']
         });
 
         const page = await browser.newPage();
         const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/content/${req.params.id}`, {
             waitUntil : "networkidle0",
             referer: process.env.ORDINALS_ENDPOINT,
-            referrerPolicy: 'strict-origin-when-cross-origin'
+            referrerPolicy: 'strict-origin-when-cross-origin',
         });
 
         if(!navigation?.ok()){
             const m = navigation ? navigation.statusText() : 'Request cannot be handled at this time';
-            throw new Error(m);
-        }
-
-        if(process.env.NODE_ENV !== 'dev'){
-            const xKey = req?.headers['x-key'];
-
-            if(!xKey || xKey !== process.env.ORDINALS_XKEY){
-                throw new Error('Unauthorized request')
-            }
+            throw new NavigationError(m);
         }
 
         const screenshot = await page.screenshot({ 
@@ -70,7 +102,7 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
 })
 
 router.get('*', async (req: Request, res: Response, next: NextFunction) => {
-    next(new Error('Not found'))
+    next(new NotFoundError('Not found'))
 })
 
 export default router;
