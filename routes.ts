@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express'
 import puppeteer from 'puppeteer';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
+import axios from 'axios'
 
 const router = express.Router()
 
@@ -70,7 +71,7 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
         const page = await browser.newPage();
         const navigation = await page.goto(`${process.env.ORDINALS_ENDPOINT}/content/${req.params.id}`, {
             waitUntil : "networkidle0",
-            referer: process.env.ORDINALS_ENDPOINT
+            referer: 'https://s.wampires.club/'
         });
 
         if(!navigation?.ok()){
@@ -87,8 +88,8 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
             clip: { x: 0, y: 0, width, height }
         });
 
-        await page.close();
-        await browser.close();
+        await page.close()
+        await browser.close()
 
         mkdirSync('./screenshots', { recursive: true });
         writeFileSync(`./screenshots/${req.params.id}.jpg`, screenshot);
