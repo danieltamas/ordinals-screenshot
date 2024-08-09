@@ -63,7 +63,7 @@ router.get('/content/:id', async (req: Request, res: Response, next: NextFunctio
 })
 
 router.get('*', async (req: Request, res: Response, next: NextFunction) => {
-    throw new Error('Not found')
+    next(new Error('Not found'))
 })
 
 export default router;
