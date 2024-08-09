@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express'
+import express, { Express, Request, Response, NextFunction } from 'express'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import cors from 'cors'
@@ -22,9 +22,19 @@ app.use(
 // Register routes
 app.use('/', routes);
 
+app.use(<ErrorRequestHandler>(err: any, req: Request, res: Response, next: NextFunction):void => {
+  process.env.PRINT_ERRORS && console.error(`[ ERROR ]`, err.code, err.message)
+  res.header('Content-Type', 'application/json');
+  res.status(err.code).json({
+      error: true,
+      status: err.code,
+      message: err.message,
+  });
+})
+
 // Initialize the server
 app.listen(process.env.ORDINALS_PORT, async () => {
-  console.log(`Ordinals Screenshot Server is running at http://localhost:${process.env.ORDINALS_PORT}`)
+  console.log(`Screenshot Server running at http://localhost:${process.env.ORDINALS_PORT}`)
 })
 
 // Gracefully shutdown the server

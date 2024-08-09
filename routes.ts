@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import puppeteer from 'puppeteer';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
 
 const router = express.Router()
 
-router.get('/content/:id', async (req: Request, res: Response) => {
+router.get('/content/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
 
         if(!('id' in req.params)){
@@ -58,12 +58,12 @@ router.get('/content/:id', async (req: Request, res: Response) => {
         res.set('content-type', 'image/jpeg');
         return res.status(200).send(screenshot);
     }catch(err: any){
-        return res.status(404).json({ error: true, message: err.message || err })
+        return next(err)
     }
 })
 
-router.get('/', async (req: Request, res: Response) => {
-    return res.status(404).json({ error: true, message: 'Not found' });
+router.get('*', async (req: Request, res: Response, next: NextFunction) => {
+    throw new Error('Not found')
 })
 
 export default router;
